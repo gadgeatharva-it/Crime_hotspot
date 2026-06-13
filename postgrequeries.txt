@@ -1,0 +1,18 @@
+CREATE TABLE crime_data (
+    id SERIAL PRIMARY KEY,
+    crime_type TEXT,
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
+    crime_date DATE
+);
+
+COPY crime_data(crime_type, latitude, longitude, crime_date)
+FROM '/path/to/your/file.csv'
+DELIMITER ','
+CSV HEADER;
+
+ALTER TABLE crime_data
+ADD COLUMN geom GEOMETRY(Point, 4326);
+
+UPDATE crime_data
+SET geom = ST_SetSRID(ST_MakePoint(longitude, latitude), 4326);
