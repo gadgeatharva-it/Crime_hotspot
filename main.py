@@ -72,7 +72,7 @@ FOLIUM_COLORS = ['red', 'blue', 'green', 'purple', 'orange', 'darkgreen']
 center_lat = df['latitude'].mean()
 center_lon = df['longitude'].mean()
 
-# Create base map with a dark, attractive tile layer
+# Create base map; the OpenStreetMap layer is added below.
 m = folium.Map(
     location=[center_lat, center_lon],
     zoom_start=5,
@@ -81,22 +81,10 @@ m = folium.Map(
     prefer_canvas=True  # Better performance for many markers
 )
 
-# --- Multiple Tile Layers ---
-folium.TileLayer(
-    tiles='CartoDB dark_matter',
-    name='🌙 Dark Mode',
-    control=True
-).add_to(m)
-
-folium.TileLayer(
-    tiles='CartoDB positron',
-    name='☀️ Light Mode',
-    control=True
-).add_to(m)
-
+# --- OpenStreetMap base tile layer ---
 folium.TileLayer(
     tiles='OpenStreetMap',
-    name='🗺️ Street Map',
+    name='OpenStreetMap',
     control=True
 ).add_to(m)
 
@@ -336,14 +324,51 @@ title_html = """
 """
 m.get_root().html.add_child(folium.Element(title_html))
 
+# --- Map appearance control (filters only the OpenStreetMap tile pane) ---
+map_name = m.get_name()
+mode_control_html = f"""
+<style>
+    #map-mode-control {{
+        position: fixed; top: 78px; left: 20px; z-index: 9999;
+        background: rgba(15, 15, 26, 0.92); color: #eee;
+        padding: 10px 14px; border: 1px solid #333; border-radius: 10px;
+        font: 12px 'Segoe UI', Roboto, sans-serif;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+    }}
+    #map-mode-control strong {{ display: block; margin-bottom: 7px; color: #f39c12; }}
+    #map-mode-control label {{ display: block; margin: 5px 0; cursor: pointer; }}
+    #map-mode-control input {{ margin-right: 6px; vertical-align: middle; }}
+</style>
+<div id="map-mode-control">
+    <strong>Map Style</strong>
+    <label><input type="radio" name="map-mode" value="dark"> Dark Mode</label>
+    <label><input type="radio" name="map-mode" value="light"> Light Mode</label>
+    <label><input type="radio" name="map-mode" value="street" checked> Street Map</label>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {{
+    const map = {map_name};
+    const tilePane = map.getPane('tilePane');
+    const darkFilter = 'invert(1) hue-rotate(180deg) brightness(0.78) contrast(1.15)';
+
+    document.querySelectorAll('input[name="map-mode"]').forEach(function (mode) {{
+        mode.addEventListener('change', function () {{
+            tilePane.style.filter = mode.value === 'dark' ? darkFilter : 'none';
+        }});
+    }});
+}});
+</script>
+"""
+m.get_root().html.add_child(folium.Element(mode_control_html))
+
 # --- Layer Control ---
 folium.LayerControl(collapsed=False, position='topright').add_to(m)
 
 # -------------------------------
 # STEP 5: SAVE MAP
 # -------------------------------
-m.save("crime_hotspots.html")
+m.save("index.html")
 
-print(f"\n✅ Enhanced map saved! Open 'crime_hotspots.html'")
+print(f"\n✅ Enhanced map saved! Open 'index.html'")
 print(f"   📊 {len(df):,} crime records mapped across {N_CLUSTERS} clusters")
 print(f"   🗺️  Features: MarkerCluster, HeatMap, Detailed Popups, Layer Controls")
