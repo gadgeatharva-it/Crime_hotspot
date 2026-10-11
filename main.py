@@ -72,29 +72,19 @@ FOLIUM_COLORS = ['red', 'blue', 'green', 'purple', 'orange', 'darkgreen']
 center_lat = df['latitude'].mean()
 center_lon = df['longitude'].mean()
 
-# Create base map with a dark, attractive tile layer
+# Create base map; the OpenStreetMap layer is added below.
 m = folium.Map(
-    location=[20.5937, 78.9629],
+    location=[center_lat, center_lon],
     zoom_start=5,
-    tiles="OpenStreetMap"
+    tiles=None,       # We add tiles manually for layer control
+    control_scale=True,
+    prefer_canvas=True  # Better performance for many markers
 )
 
-# --- Multiple Tile Layers ---
-folium.TileLayer(
-    tiles='CartoDB dark_matter',
-    name='🌙 Dark Mode',
-    control=True
-).add_to(m)
-
-folium.TileLayer(
-    tiles='CartoDB positron',
-    name='☀️ Light Mode',
-    control=True
-).add_to(m)
-
+# --- OpenStreetMap base tile layer ---
 folium.TileLayer(
     tiles='OpenStreetMap',
-    name='🗺️ Street Map',
+    name='OpenStreetMap',
     control=True
 ).add_to(m)
 
