@@ -74,11 +74,9 @@ center_lon = df['longitude'].mean()
 
 # Create base map with a dark, attractive tile layer
 m = folium.Map(
-    location=[center_lat, center_lon],
+    location=[20.5937, 78.9629],
     zoom_start=5,
-    tiles=None,       # We add tiles manually for layer control
-    control_scale=True,
-    prefer_canvas=True  # Better performance for many markers
+    tiles="OpenStreetMap"
 )
 
 # --- Multiple Tile Layers ---
